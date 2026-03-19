@@ -23,7 +23,7 @@ test("buildPaymentChallenge is stable for identical inputs", () => {
         escrowContract: "0x0000000000000000000000000000000000000003",
         channelId: "0x1111111111111111111111111111111111111111111111111111111111111111",
         minVoucherDelta: "100000",
-        feePayer: true,
+        feePayer: false,
         chainId: 42431
       }
     },
@@ -55,7 +55,7 @@ test("buildPaymentChallenge is stable for identical inputs", () => {
         escrowContract: "0x0000000000000000000000000000000000000003",
         channelId: "0x1111111111111111111111111111111111111111111111111111111111111111",
         minVoucherDelta: "100000",
-        feePayer: true,
+        feePayer: false,
         chainId: 42431
       }
     },
@@ -88,7 +88,7 @@ test("challenge header round-trips through WWW-Authenticate parsing", () => {
       methodDetails: {
         escrowContract: "0x0000000000000000000000000000000000000003",
         minVoucherDelta: "100000",
-        feePayer: true,
+        feePayer: false,
         chainId: 42431
       }
     },

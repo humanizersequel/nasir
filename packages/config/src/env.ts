@@ -23,7 +23,6 @@ export const apiEnvSchema = z.object({
   DATABASE_URL: z.string().min(1),
   RPC_URL: z.string().url(),
   MPP_CHALLENGE_SECRET: z.string().min(16),
-  FEE_PAYER_PRIVATE_KEY: z.string().regex(/^0x[a-fA-F0-9]{64}$/),
   AUCTION_HOUSE_ADDRESS: lowerAddressSchema,
   ESCROW_ADDRESS: lowerAddressSchema,
   QUOTE_TOKEN_ADDRESS: lowerAddressSchema,
@@ -63,4 +62,3 @@ export function splitCorsOrigins(rawOrigins: string): string[] {
     .map((origin) => origin.trim())
     .filter(Boolean);
 }
-

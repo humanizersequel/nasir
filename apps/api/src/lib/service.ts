@@ -580,7 +580,7 @@ export class ApiService {
               }
             : {}),
           minVoucherDelta: input.lot.bidIncrement,
-          feePayer: true,
+          feePayer: false,
           chainId: DEFAULT_CHAIN_ID
         }
       },
