@@ -10,6 +10,7 @@ type PersistedSessionState = {
   chainId: number;
   escrowContract: string;
   channelId: string;
+  closeRequestedAt: string | null;
   createdAt: string;
   deposit: string;
   finalized: boolean;
@@ -28,11 +29,15 @@ type PersistedSessionState = {
 };
 
 function serializeSessionState(state: Session.ChannelStore.State): string {
+  const maybeCloseRequestedState = state as Session.ChannelStore.State & {
+    closeRequestedAt?: bigint;
+  };
   const persisted: PersistedSessionState = {
     authorizedSigner: state.authorizedSigner.toLowerCase(),
     chainId: state.chainId,
     escrowContract: state.escrowContract.toLowerCase(),
     channelId: state.channelId.toLowerCase(),
+    closeRequestedAt: maybeCloseRequestedState.closeRequestedAt?.toString() ?? null,
     createdAt: state.createdAt,
     deposit: state.deposit.toString(),
     finalized: state.finalized,
@@ -63,6 +68,7 @@ function deserializeSessionState(raw: string): Session.ChannelStore.State {
     chainId: persisted.chainId,
     escrowContract: persisted.escrowContract as `0x${string}`,
     channelId: persisted.channelId as `0x${string}`,
+    closeRequestedAt: persisted.closeRequestedAt ? BigInt(persisted.closeRequestedAt) : 0n,
     createdAt: persisted.createdAt,
     deposit: BigInt(persisted.deposit),
     finalized: persisted.finalized,
@@ -80,7 +86,7 @@ function deserializeSessionState(raw: string): Session.ChannelStore.State {
     spent: BigInt(persisted.spent),
     token: persisted.token as `0x${string}`,
     units: persisted.units
-  };
+  } as Session.ChannelStore.State;
 }
 
 function tryReconstructSessionState(parameters: {
@@ -102,6 +108,7 @@ function tryReconstructSessionState(parameters: {
     chainId: DEFAULT_CHAIN_ID,
     escrowContract: env.ESCROW_ADDRESS as `0x${string}`,
     channelId: channel.channelId as `0x${string}`,
+    closeRequestedAt: channel.closeRequestedAt ? BigInt(channel.closeRequestedAt) : 0n,
     createdAt: channel.createdAt.toISOString(),
     deposit: BigInt(channel.deposit),
     finalized: channel.finalized,
@@ -117,7 +124,7 @@ function tryReconstructSessionState(parameters: {
     spent: 0n,
     token: env.QUOTE_TOKEN_ADDRESS as `0x${string}`,
     units: 0
-  };
+  } as Session.ChannelStore.State;
 }
 
 export function createRepositoryBackedPaymentStore(repository: AuctionRepository, env: ApiEnv) {
@@ -146,6 +153,9 @@ export function createRepositoryBackedPaymentStore(repository: AuctionRepository
 
     async put(key: string, value: unknown) {
       const state = value as Session.ChannelStore.State;
+      const maybeCloseRequestedState = state as Session.ChannelStore.State & {
+        closeRequestedAt?: bigint;
+      };
       const existing = await repository.getChannel(key.toLowerCase());
       const lotId =
         existing?.lotId ??
@@ -163,7 +173,7 @@ export function createRepositoryBackedPaymentStore(repository: AuctionRepository
         deposit: state.deposit.toString(),
         settled: state.settledOnChain.toString(),
         finalized: state.finalized,
-        closeRequestedAt: null,
+        closeRequestedAt: maybeCloseRequestedState.closeRequestedAt ?? null,
         latestVoucherAmount: state.highestVoucherAmount.toString(),
         latestVoucherSig: state.highestVoucher?.signature ?? null,
         sessionState: serializeSessionState(state)
